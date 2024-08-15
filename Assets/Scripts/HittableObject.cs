@@ -16,9 +16,11 @@ public class HittableObject : MonoBehaviour
     public float maxVolume = 1.0f;
     public float velocityFactor = 0.1f; // Adjust this to scale the velocity impact on volume
 
+    private GameObject _debugCube;
+
     // Reference to the Rigidbody of the object this script is attached to
     //private Rigidbody rb;
-    
+
     // Store the previous velocity of the object
     //private Vector3 previousVelocity;
 
