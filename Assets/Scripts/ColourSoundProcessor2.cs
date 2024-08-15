@@ -1,4 +1,4 @@
-using System.Collections;
+/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -101,16 +101,12 @@ public class ColourSoundProcessor : MonoBehaviour
         }
     }
 
-    public void PlaySoundOnHit()
+    void Update()
     {
-        // Ensure the target frequency has been set
-        if (targetFrequency != -1)
+        // Check for spacebar press
+        if (Input.GetKeyDown(KeyCode.Space) && targetFrequency != -1)
         {
             StartCoroutine(ProcessColor(dominantColor, targetFrequency));
-        }
-        else
-        {
-            Debug.LogError("No valid frequency found for the object's color.");
         }
     }
 
@@ -145,6 +141,7 @@ public class ColourSoundProcessor : MonoBehaviour
         return (closestColor, closestColorName);
     }
 
+
     private float ColorDistance(Vector3 lab1, Vector3 lab2, Color color)
     {
         // CIE76 color difference formula
@@ -161,6 +158,8 @@ public class ColourSoundProcessor : MonoBehaviour
 
         return distance;
     }
+
+
 
     private Vector3 RGBToLab(Color color)
     {
@@ -224,48 +223,201 @@ public class ColourSoundProcessor : MonoBehaviour
         List<Vector3> clusterCenters = kmeans.Cluster(colorVectors);
 
         // Determine the most frequent cluster
-        List<int> clusterSizes = new List<int>(new int[numberOfClusters]);
-        foreach (var colorVector in colorVectors)
+        List<int> labels = kmeans.AssignLabels(colorVectors);
+        int[] counts = new int[numberOfClusters];
+        foreach (int label in labels)
         {
-            int clusterIndex = kmeans.GetNearestClusterIndex(colorVector);
-            clusterSizes[clusterIndex]++;
+            counts[label]++;
         }
 
-        int dominantClusterIndex = clusterSizes.IndexOf(clusterSizes.Max());
-        Vector3 dominantColorVector = clusterCenters[dominantClusterIndex];
+        int dominantCluster = counts.Select((count, index) => new { count, index })
+                                    .OrderByDescending(x => x.count)
+                                    .First()
+                                    .index;
 
-        return new Color(dominantColorVector.x, dominantColorVector.y, dominantColorVector.z);
+        // Calculate the centroid of the dominant cluster
+        Vector3 dominantColorVector = clusterCenters[dominantCluster];
+        Color dominantColor = new Color(dominantColorVector.x, dominantColorVector.y, dominantColorVector.z);
+
+        return dominantColor;
+    }
+
+    private IEnumerator ProcessColor(Color color, int frequency)
+    {
+        Debug.Log($"Processing Color: RGB ({color.r * 255}, {color.g * 255}, {color.b * 255}) with Base Frequency: {frequency} Hz");
+
+        // Play multiple sine waves in succession
+        for (int i = 0; i < numberOfWaves; i++)
+        {
+            yield return StartCoroutine(PlaySineWave(frequency));
+            if (i < numberOfWaves - 1) // Prevent a delay after the last wave
+            {
+                yield return new WaitForSeconds(waveInterval); // Wait between waves
+            }
+        }
+    }
+
+    private IEnumerator PlaySineWave(int frequency)
+    {
+        // Stop any currently playing audio
+        if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+
+        // Generate audio data for the sine wave with easing
+        int sampleRate = 44100;
+        int sampleCount = (int)(sampleRate * sineWaveDuration);
+        float[] samples = new float[sampleCount];
+
+        for (int i = 0; i < sampleCount; i++)
+        {
+            float time = i / (float)sampleRate;
+            float easedTime = (float)EasingFunction(i, sampleCount); // Apply easing
+            samples[i] = easedTime * Mathf.Sin(2 * Mathf.PI * frequency * time);
+        }
+
+        // Create and set the AudioClip
+        AudioClip audioClip = AudioClip.Create("SineWave_" + frequency, sampleCount, 1, sampleRate, false);
+        audioClip.SetData(samples, 0);
+
+        audioSource.clip = audioClip;
+        audioSource.Play();
+
+        // Wait for the sound to finish playing
+        yield return new WaitForSeconds(sineWaveDuration);
+    }
+
+    public static double EasingFunction(int step, int totalSteps)
+    {
+        double t = (double)step / (totalSteps - 1); // Normalized time
+
+        // Ease-In-Out function: Smooth transition in and out
+        if (t < 0.5)
+        {
+            return 8 * t * t * t * t;
+        }
+        else
+        {
+            double f = (t - 1);
+            return 1 - 8 * f * f * f * f;
+        }
     }
 
     private string ColorToString(Color color)
     {
-        return $"({color.r * 255}, {color.g * 255}, {color.b * 255})";
-    }
-
-    private IEnumerator ProcessColor(Color color, float frequency)
-    {
-        for (int i = 0; i < numberOfWaves; i++)
-        {
-            PlaySineWave(frequency, sineWaveDuration);
-            yield return new WaitForSeconds(sineWaveDuration + waveInterval);
-        }
-    }
-
-    private void PlaySineWave(float frequency, float duration)
-    {
-        // Generate and play a sine wave
-        int sampleRate = AudioSettings.outputSampleRate;
-        int samples = Mathf.FloorToInt(sampleRate * duration);
-        float[] buffer = new float[samples];
-
-        for (int i = 0; i < samples; i++)
-        {
-            buffer[i] = Mathf.Sin(2 * Mathf.PI * frequency * i / sampleRate);
-        }
-
-        AudioClip clip = AudioClip.Create("SineWave", samples, 1, sampleRate, false);
-        clip.SetData(buffer, 0);
-        audioSource.clip = clip;
-        audioSource.Play();
+        return $"R: {Mathf.RoundToInt(color.r * 255)}, G: {Mathf.RoundToInt(color.g * 255)}, B: {Mathf.RoundToInt(color.b * 255)}";
     }
 }
+
+public class KMeans
+{
+    private int k;
+    private List<Vector3> centroids;
+
+    public KMeans(int k)
+    {
+        this.k = k;
+        this.centroids = new List<Vector3>(k);
+    }
+
+    public List<Vector3> Cluster(List<Vector3> data)
+    {
+        // Initialize centroids randomly
+        InitializeCentroids(data);
+
+        bool hasChanged;
+        do
+        {
+            hasChanged = false;
+
+            // Assign each point to the nearest centroid
+            var clusters = new List<List<Vector3>>(k);
+            for (int i = 0; i < k; i++)
+            {
+                clusters.Add(new List<Vector3>());
+            }
+
+            List<int> labels = AssignLabels(data);
+            for (int i = 0; i < data.Count; i++)
+            {
+                clusters[labels[i]].Add(data[i]);
+            }
+
+            // Update centroids
+            for (int i = 0; i < k; i++)
+            {
+                Vector3 newCentroid = ComputeMean(clusters[i]);
+                if (centroids[i] != newCentroid)
+                {
+                    centroids[i] = newCentroid;
+                    hasChanged = true;
+                }
+            }
+        }
+        while (hasChanged);
+
+        return centroids;
+    }
+
+    public List<int> AssignLabels(List<Vector3> data)
+    {
+        List<int> labels = new List<int>(data.Count);
+        foreach (var point in data)
+        {
+            labels.Add(FindClosestCentroid(point));
+        }
+        return labels;
+    }
+
+    private void InitializeCentroids(List<Vector3> data)
+    {
+        HashSet<int> chosenIndices = new HashSet<int>();
+        System.Random rand = new System.Random();
+
+        for (int i = 0; i < k; i++)
+        {
+            int index;
+            do
+            {
+                index = rand.Next(data.Count);
+            } while (chosenIndices.Contains(index));
+
+            chosenIndices.Add(index);
+            centroids.Add(data[index]);
+        }
+    }
+
+    private int FindClosestCentroid(Vector3 point)
+    {
+        int closestIndex = 0;
+        float minDistance = Vector3.SqrMagnitude(point - centroids[0]);
+
+        for (int i = 1; i < centroids.Count; i++)
+        {
+            float distance = Vector3.SqrMagnitude(point - centroids[i]);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestIndex = i;
+            }
+        }
+
+        return closestIndex;
+    }
+
+    private Vector3 ComputeMean(List<Vector3> points)
+    {
+        if (points.Count == 0)
+            return Vector3.zero;
+
+        Vector3 sum = Vector3.zero;
+        foreach (var point in points)
+        {
+            sum += point;
+        }
+
+        return sum / points.Count;
+    }
+}
+*/

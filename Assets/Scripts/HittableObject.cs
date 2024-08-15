@@ -18,6 +18,14 @@ public class HittableObject : MonoBehaviour
 
     private ColourSoundProcessor colourSoundProcessor;
 
+    private void Start()
+    {
+        if (colourSoundProcessor == null)
+        {
+            Debug.LogError("ColourSoundProcessor is not assigned!");
+        }
+    }
+
     // This function is called when another collider enters the trigger collider attached to the game object
     private void OnCollisionEnter(Collision collision)
     {
@@ -31,10 +39,13 @@ public class HittableObject : MonoBehaviour
             float volume = Mathf.Clamp(collisionVelocity * velocityFactor, minVolume, maxVolume);
 
             // Play the hit sound with the calculated volume
-            PlayHitSound(volume);
+            //PlayHitSound(volume);
 
-            // Process color and play sound using the ColourSoundProcessor
-            colourSoundProcessor?.ProcessColorAndPlaySound();
+            if (colourSoundProcessor != null)
+            {
+                // Trigger the sound based on the object's color
+                colourSoundProcessor.PlaySoundOnHit();
+            }
         }
     }
 
