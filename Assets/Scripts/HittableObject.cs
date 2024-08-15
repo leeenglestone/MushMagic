@@ -18,13 +18,6 @@ public class HittableObject : MonoBehaviour
 
     private ColourSoundProcessor colourSoundProcessor;
 
-    private void Start()
-    {
-        if (colourSoundProcessor == null)
-        {
-            Debug.LogError("ColourSoundProcessor is not assigned!");
-        }
-    }
 
     // This function is called when another collider enters the trigger collider attached to the game object
     private void OnCollisionEnter(Collision collision)
@@ -88,6 +81,7 @@ public class HittableObject : MonoBehaviour
         {
             Debug.LogWarning("No ColourSoundProcessor found on the object.");
         }
+
     }
 
     private void PlayHitSound(float volume)
