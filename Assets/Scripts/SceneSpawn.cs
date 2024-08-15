@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using static Meta.XR.MRUtilityKit.MRUKAnchor;
@@ -18,17 +19,25 @@ namespace Assets.Scripts
 
 
         private GameObject _debugCube2;
-        
-      
+        private GameObject _mush;
+
+        [SerializeField]
+        private float cooldown = 0.5f;
+
+        private float lastSpawn;
+
+
+
         void Start()
         {
             Debug.Log("SceneSpawn.Start");
 
-            _debugCube2 = GameObject.Find("SomeCube");
+            //_debugCube2 = GameObject.Find("SomeCube");
+            _mush = GameObject.Find("Mush");
 
         }
 
-       
+
 
         void Update()
         {
@@ -39,27 +48,36 @@ namespace Assets.Scripts
             MRUKRoom room = MRUK.Instance.GetCurrentRoom();
             bool hasHit = room.Raycast(ray, rayLength, LabelFilter.FromEnum(labelFilter), out RaycastHit hit, out MRUKAnchor anchor);
 
-            if(hasHit)
+            if (hasHit)
             {
                 Vector3 hitPoint = hit.point;
-                
-                _debugCube2.transform.position =  hitPoint;
-                
+
+                //_debugCube2.transform.position =  hitPoint;
+                _mush.transform.position = hitPoint;
+
 
                 // If right trigger press.. place a cube at that position
-                if(OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger) ||
+                if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger) ||
                     OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
                 {
-                    GameObject newCube = GameObject.Instantiate(_debugCube2);
-                    newCube.transform.position = hitPoint;
+                    //GameObject newCube = GameObject.Instantiate(_debugCube2);
+                    //newCube.transform.position = hitPoint;
+
+                    if (Time.time < lastSpawn + cooldown)
+                        return;
+
+                    GameObject newMush = GameObject.Instantiate(_mush);
+                    newMush.transform.position = hitPoint;
+
+                    lastSpawn = Time.time;
 
                 };
             }
 
 
-         
+
         }
 
-      
+
     }
 }
