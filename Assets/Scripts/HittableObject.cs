@@ -16,6 +16,11 @@ public class HittableObject : MonoBehaviour
     public float maxVolume = 1.0f;
     public float velocityFactor = 0.1f; // Adjust this to scale the velocity impact on volume
 
+    // Reference to the Rigidbody of the object this script is attached to
+    //private Rigidbody rb;
+    
+    // Store the previous velocity of the object
+    //private Vector3 previousVelocity;
 
     // This function is called when another collider enters the trigger collider attached to the game object
     private void OnCollisionEnter(Collision collision)
@@ -35,14 +40,26 @@ public class HittableObject : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Hand"))
-        {
-            Debug.Log("Hand entered the trigger area of the object!");
-            // Handle your logic here
-        }
-    }
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    // If the other object has a Rigidbody, calculate the relative velocity
+    //    Rigidbody otherRb = other.attachedRigidbody;
+    //    if (otherRb != null)
+    //    {
+    //        Vector3 relativeVelocity = otherRb.velocity - previousVelocity;
+    //        float magnitude = relativeVelocity.magnitude;
+
+    //        Debug.Log("Trigger entered by: " + other.gameObject.name);
+    //        Debug.Log("Relative velocity magnitude: " + magnitude);
+
+    //        // Play sound or perform other actions based on the relative velocity
+    //        PlayHitSoundBasedOnVelocity(magnitude);
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("The other object does not have a Rigidbody.");
+    //    }
+    //}
 
 
 
@@ -71,6 +88,9 @@ public class HittableObject : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Get the Rigidbody component attached to this GameObject
+        //rb = GetComponent<Rigidbody>();
+
         // Add an AudioSource component to the GameObject at runtime
         audioSource = gameObject.AddComponent<AudioSource>();
 
@@ -85,9 +105,12 @@ public class HittableObject : MonoBehaviour
     {
         if (hitSound != null && audioSource != null)
         {
-            audioSource.volume = volume;
-            audioSource.clip = hitSound;
-            audioSource.Play();
+            if (!audioSource.isPlaying)
+            {
+                audioSource.volume = volume;
+                audioSource.clip = hitSound;
+                audioSource.Play();
+            }
         }
         else
         {
@@ -95,9 +118,32 @@ public class HittableObject : MonoBehaviour
         }
     }
 
+    //private void PlayHitSoundBasedOnVelocity(float velocityMagnitude)
+    //{
+    //    // Assuming you have an AudioSource and AudioClip attached and set up
+    //    AudioSource audioSource = GetComponent<AudioSource>();
+
+    //    if (audioSource != null)
+    //    {
+    //        // Scale volume based on velocity
+    //        float volume = Mathf.Clamp(velocityMagnitude / 10.0f, 0.1f, 1.0f); // Adjust scaling as needed
+    //        audioSource.volume = volume;
+    //        audioSource.Play();
+    //    }
+    //}
+
     // Update is called once per frame
     void Update()
     {
         
     }
+
+    //void FixedUpdate()
+    //{
+    //    // Update the previous velocity to the current velocity each physics update
+    //    if (rb != null)
+    //    {
+    //        previousVelocity = rb.velocity;
+    //    }
+    //}
 }
