@@ -12,7 +12,7 @@ public class HittableObject : MonoBehaviour
     private AudioSource audioSource;
 
     // Set volume scaling factors
-    public float minVolume = 0.2f;
+    public float minVolume = 0.1f;
     public float maxVolume = 1.0f;
     public float velocityFactor = 0.1f; // Adjust this to scale the velocity impact on volume
 
