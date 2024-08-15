@@ -8,9 +8,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Samples/Meta MR Utility Kit/66.0.0/Multi Spawn/FindMultiSpawn.unity
     guid: 2c7c1aaff481cd1458b64e16d038f041
+  - enabled: 1
+    path: Assets/_ImageCaptureWithAI/Scenes/SimpleImageLoader.unity
+    guid: 69c276748b17a6641bd1057ad3eb61ca
+  - enabled: 0
+    path: Assets/_ImageCaptureWithAI/Scenes/ImageLibrary.unity
+    guid: 64f111ea977b79b4385788f9104f16d3
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: c32564509a5ed4a79b36c1a54690ff15,
       type: 2}

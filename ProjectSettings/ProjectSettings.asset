@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: Mushmagic
-  productName: MushMagics
+  companyName: Mushmagic1
+  productName: MushMagics1
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -142,6 +142,8 @@ PlayerSettings:
   bundleVersion: 0.1.0
   preloadedAssets:
   - {fileID: 11400000, guid: fa241eb7b7f2f4f1f9c3d789af3b5cae, type: 2}
+  - {fileID: -1758713226443648453, guid: d03010bb125bf43b384d5a4dfe4aaa3f, type: 2}
+  - {fileID: 11400000, guid: c32564509a5ed4a79b36c1a54690ff15, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -162,7 +164,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.mushmagic.mushmagics
+    Android: com.mushmagic.mushmagics1
     Standalone: com.mushmagic.unity.mushmagic
     iPhone: com.Unity-Technologies.com.unity.template.urp-blank
   buildNumber:
@@ -172,8 +174,8 @@ PlayerSettings:
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 1
-  AndroidMinSdkVersion: 31
-  AndroidTargetSdkVersion: 0
+  AndroidMinSdkVersion: 32
+  AndroidTargetSdkVersion: 32
   AndroidPreferredInstallLocation: 0
   aotOptions: 
   stripEngineCode: 1
@@ -254,7 +256,7 @@ PlayerSettings:
   clonedFromGUID: 3c72c65a16f0acb438eed22b8b16c24a
   templatePackageId: com.unity.template.urp-blank@14.0.0
   templateDefaultScene: Assets/Scenes/SampleScene.unity
-  useCustomMainManifest: 0
+  useCustomMainManifest: 1
   useCustomLauncherManifest: 0
   useCustomMainGradleTemplate: 0
   useCustomLauncherGradleManifest: 0
