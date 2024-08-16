@@ -56,11 +56,18 @@ public class ColourSoundProcessor : MonoBehaviour
 
     void Start()
     {
+        // Ensure the audioSource is assigned
         if (audioSource == null)
         {
-            Debug.LogError("AudioSource is not assigned!");
-            return;
+            audioSource = GetComponent<AudioSource>();
+
+            if (audioSource == null)
+            {
+                Debug.LogError("AudioSource is not assigned and could not be found on the GameObject!");
+                return;
+            }
         }
+
 
         if (targetObject == null)
         {
@@ -108,6 +115,15 @@ public class ColourSoundProcessor : MonoBehaviour
         {
             StartCoroutine(ProcessColor(dominantColor, targetFrequency));
         }
+        // If no valid frequency found, default to black color's frequency
+        else if (targetFrequency == -1)
+        {
+            Debug.LogWarning("No valid frequency found for the object's dominant color. Defaulting to black color sound.");
+            targetFrequency = ColorSoundMap[Color.black];
+            dominantColor = Color.black;  // Set the color to black
+            StartCoroutine(ProcessColor(dominantColor, targetFrequency));
+        }
+
         else
         {
             Debug.LogError("No valid frequency found for the object's color.");

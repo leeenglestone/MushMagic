@@ -32,13 +32,17 @@ public class HittableObject : MonoBehaviour
             float volume = Mathf.Clamp(collisionVelocity * velocityFactor, minVolume, maxVolume);
 
             // Play the hit sound with the calculated volume
-            PlayHitSound(volume);
+            //PlayHitSound(volume);
 
-            //if (colourSoundProcessor != null)
-            //{
-            //    // Trigger the sound based on the object's color
-            //    colourSoundProcessor.PlaySoundOnHit();
-            //}
+           if (colourSoundProcessor != null)
+            {
+                // Trigger the sound based on the object's color
+                colourSoundProcessor.PlaySoundOnHit();
+            }
+            else
+            {
+                PlayHitSound(volume);
+            }
         }
     }
 
